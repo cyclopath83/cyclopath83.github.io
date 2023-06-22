@@ -38,3 +38,4 @@ Now we know we need to return 3 columns in our injection, we need to find a colu
 Again, start with trying the first column, and move further untill you don't get an error anymore.\
 `https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT NULL,'abc',NULL--`
 
+
