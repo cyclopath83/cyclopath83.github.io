@@ -324,6 +324,6 @@ Will update this if I every have it.
 
 ## Credits
 
-[Header image by flaticon](https://www.flaticon.com/free-icons/hacking)
+Header image by [flaticon](https://www.flaticon.com/free-icons/hacking)
 
 
