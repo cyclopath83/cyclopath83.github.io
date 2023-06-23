@@ -6,7 +6,7 @@ categories: [Portswigger Academy, Server-Side Topics]
 tags: [Authentication, Write-up]
 img_path: /assets/img/labs/portswigger/authentication/
 image:
-  path: authentication.png
+  path: authentication.jpg
 ---
 
 ## Info
