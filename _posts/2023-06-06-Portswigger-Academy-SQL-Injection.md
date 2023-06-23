@@ -70,3 +70,4 @@ Now that this doens't return an error, we can actually check which database type
 ## Credits
 
 [Header image by flaticon](https://www.flaticon.com/free-icons/hacking)
+
