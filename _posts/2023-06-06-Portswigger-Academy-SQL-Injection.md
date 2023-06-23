@@ -2,7 +2,7 @@
 layout: post
 title: Portswigger Academy - SQL Injection
 date: 2023-06-06 15:43:18 +0200
-categories: [Portswigger Academy, SQL Injection]
+categories: [Portswigger Academy, Server-Side Topics]
 tags: [SQL Injection, Write-up, Cheat Sheet]
 img_path: /assets/img/labs/portswigger/sql-injection/
 image:
