@@ -322,7 +322,6 @@ Will update this if I every have it.
 {: .prompt-info }
 
 
-
 ## Credits
 
 [Header image by flaticon](https://www.flaticon.com/free-icons/hacking)
