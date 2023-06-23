@@ -238,7 +238,6 @@ Wait for 1 minute, and log in on the website with the found username and passwor
   (I had to swap the order of the password and username, otherwise it would try every password first and then repeat the whole list for 5 times, which takes too much time to trigger the lock-out )
     * 1st set of payload: null; with 5 attempts
     * 2nd set of payload: username list
-
 * Find the password:
   * Perform a sniper attack with a regex grep-extract
 {: .prompt-info}
