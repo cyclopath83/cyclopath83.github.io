@@ -4,6 +4,9 @@ title: Portswigger Academy - SQL Injection
 date: 2023-06-06 15:43:18 +0200
 categories: [Portswigger Academy, SQL Injection]
 tags: [SQL Injection, Write-up, Cheat Sheet]
+img_path: /assets/img/labs/portswigger/sql-injection/
+image:
+  path: sql-injection.png
 ---
 
 ## Info
