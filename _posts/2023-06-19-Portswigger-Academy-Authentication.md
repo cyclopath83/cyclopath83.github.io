@@ -15,10 +15,7 @@ This is my write-up for the *Authentication* learning path at the Portswigger Ac
 The reason for this write-up is to have a cheat-sheet or some go-to notes for myself.\
 Probably I've found flags in a different way than intended (with or without the use of BurpSuite), and not always in the order of learning path.
 
-
 ## Credits
 
 [Header image by freepik](https://www.freepik.com/free-vector/gradient-ssl-illustration_22112339.htm)
-
-
 
