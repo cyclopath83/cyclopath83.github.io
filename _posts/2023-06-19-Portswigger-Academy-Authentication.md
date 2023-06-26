@@ -249,7 +249,7 @@ And as the title says, we need to be able to check multiple credentials per requ
 Same as previous labs, if we try a random password and attempt to login as carlos multiple times, we are locked out for 1 minute.
 
 Capturing the login request via Burp, and we can see that there is something different than in other labs.\
-The post-data is not just `username=carlos&password=test`, but it's in a json object format:\
+The post-data is not just `username=carlos&password=test`, but it's in a json object format:
 ```json
 {
    "username": "carlos",
@@ -259,7 +259,7 @@ The post-data is not just `username=carlos&password=test`, but it's in a json ob
 {: .nolineno}
 
 This info, together with the hint in the title, points me towards using an array of passwords or an array of usernames/passwords instead of a single username/password.\
-I first wanted to check if this worked or not, by passing this as the post-data:\
+I first wanted to check if this worked or not, by passing this as the post-data:
 ```json
 {
    "username": "carlos",
@@ -273,7 +273,7 @@ I first wanted to check if this worked or not, by passing this as the post-data:
 {: .nolineno}
 Which at least didn't gave an error, so that's worth a shot.
 
-Wrote a little script that generated the payload:\
+Wrote a little script that generated the payload:
 ```bash
 #!/bin/bash
 
@@ -294,6 +294,38 @@ echo '}'
 
 And then intercepted a new login attempt with Burp, changed the payload to the output of this script, and forwarded it to the browser.\
 Lab solved.
+
+
+## LAB : 2FA simple bypass
+
+We are presented with 2 valid credentials: mine (wiener / peter) and the victim (carlos / montoya).\
+Trying to login with my credentials, it asks for a 4 digit code, which we don't have. Trying *1234* fails, and brings us back to the login page.
+
+Trying to login with the victims credentials asks for the same 4 digit code.\
+However, when you just return to the main page (removing the */login2* part of the url) and going to myaccount, will show that you are actually logged in as carlos.\
+Lab solved.
+
+
+## LAB : 2FA broken logic
+
+We are presented with our own valid credentials (wiener / peter) and the victim's username (carlos).\
+Secondly, we also have access to the e-mail server where the MFA codes are being send to.
+
+My first several attempts were to login as *wiener*, get the MFA code, and use that code but change the request from *verify=wiener* to *verify=carlos*, but none of those attempts worked.\
+After many failed attempts, I figured this access to the e-mail server was just a rabbithole.
+
+The next attempt was to login as *wiener*, and then capture the MFA code input request. Since I had to intrude a big payload I jused caido this time, as I don't have the paid version of burpsuite, and large intruder payloads just take ages in the community version.\
+Again, change the cookie in the request from *verifiy=wiener* to *verify=carlos*, and sent the request to automate.\
+I created a wordlist with numbers 0000 to 9999, and used this as payload in caido.
+
+1 request had a different status code, so this was the MFA code that I was looking for.\
+I captured another MFA code input request, this time in burp, and changed the cookie and the MFA code, and forwarded the request to the browser.
+
+It showed that I was logged in as carlos, but not lab solved.\
+Just going to *my account* solved the lab.
+
+
+
 
 
 ## Credits
